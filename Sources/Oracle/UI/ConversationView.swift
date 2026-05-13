@@ -24,6 +24,17 @@ struct ConversationView: View {
                 }
             }
         }
+        .mask(
+            VStack(spacing: 0) {
+                Rectangle().fill(Color.white)
+                LinearGradient(
+                    colors: [.white, .clear],
+                    startPoint: .top,
+                    endPoint: .bottom
+                )
+                .frame(height: 30)
+            }
+        )
     }
     
     // Hide raw tool result messages from the UI since results are shown inline in ToolCallView
