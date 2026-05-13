@@ -16,6 +16,7 @@ final class AppState {
     
     // Track tool execution status for UI display, keyed by tool call ID
     var toolExecutionStatus: [String: ToolExecutionStatus] = [:]
+    var isPlayingVoiceDemo = false
     
     let settings = AppSettings()
     private let audioRecorder = AudioRecorder()
@@ -417,6 +418,8 @@ final class AppState {
     func demoVoice() async {
         let demoText = "Hello! This is how I sound."
         logger.info("Playing voice demo")
+        isPlayingVoiceDemo = true
+        defer { isPlayingVoiceDemo = false }
         
         do {
             let audioData = try await tts.synthesize(
@@ -431,6 +434,11 @@ final class AppState {
             logger.error("Voice demo failed: \(error.localizedDescription)")
             showError(title: "Voice Demo Error", message: error.localizedDescription)
         }
+    }
+    
+    func stopVoiceDemo() {
+        audioPlayer.stop()
+        isPlayingVoiceDemo = false
     }
     
     // MARK: - Errors

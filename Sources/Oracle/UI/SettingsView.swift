@@ -40,9 +40,13 @@ struct SettingsView: View {
                     .frame(maxWidth: 250)
                     
                     Button {
-                        Task { await appState.demoVoice() }
+                        if appState.isPlayingVoiceDemo {
+                            appState.stopVoiceDemo()
+                        } else {
+                            Task { await appState.demoVoice() }
+                        }
                     } label: {
-                        Image(systemName: "play.fill")
+                        Image(systemName: appState.isPlayingVoiceDemo ? "pause.fill" : "play.fill")
                     }
                     .buttonStyle(.borderless)
                 }
