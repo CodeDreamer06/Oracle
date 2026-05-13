@@ -14,6 +14,9 @@ final class AppState {
     var pendingToolConfirmation: ToolConfirmationRequest?
     var onPanelDismissed: (() -> Void)? = nil
     
+    // Track tool execution status for UI display, keyed by tool call ID
+    var toolExecutionStatus: [String: ToolExecutionStatus] = [:]
+    
     let settings = AppSettings()
     private let audioRecorder = AudioRecorder()
     private let audioPlayer = AudioPlayerService()
@@ -47,6 +50,8 @@ final class AppState {
         audioPlayer.stop()
         messages.removeAll()
         assistantState = .idle
+        pendingToolConfirmation = nil
+        toolExecutionStatus.removeAll()
         onPanelDismissed?()
     }
     
@@ -196,9 +201,22 @@ final class AppState {
         userActivityOccurred()
         logger.info("Starting LLM stream with model \(model.modelId)")
         
-        // Convert messages to LLM format
-        let history = messages.map { msg -> LLMMessage in
-            LLMMessage(role: msg.role.rawValue, content: msg.content)
+        // Convert messages to LLM format, preserving tool calls and tool call IDs
+        let history: [LLMMessage] = messages.map { msg in
+            var llmMsg = LLMMessage(role: msg.role.rawValue, content: msg.content)
+            if let toolCalls = msg.toolCalls {
+                llmMsg.toolCalls = toolCalls.map { tc in
+                    LLMToolCall(
+                        id: tc.id,
+                        type: "function",
+                        function: LLMToolFunction(name: tc.name, arguments: tc.arguments)
+                    )
+                }
+            }
+            if let toolCallId = msg.toolCallId {
+                llmMsg.toolCallId = toolCallId
+            }
+            return llmMsg
         }
         
         let assistantMessage = ConversationMessage(role: .assistant, content: "", isStreaming: true)
@@ -213,7 +231,8 @@ final class AppState {
             )
             
             var collectedContent = ""
-            var collectedToolCalls: [ToolCall] = []
+            // Track tool calls by index to avoid duplication
+            var streamingToolCalls: [Int: ToolCall] = [:]
             
             for try await delta in stream {
                 userActivityOccurred()
@@ -228,15 +247,27 @@ final class AppState {
                 
                 if let toolCalls = delta.toolCalls {
                     for tc in toolCalls {
-                        if let existing = collectedToolCalls.firstIndex(where: { $0.id == tc.id }) {
-                            collectedToolCalls[existing] = ToolCall(
-                                id: tc.id,
-                                name: collectedToolCalls[existing].name,
-                                arguments: collectedToolCalls[existing].arguments + tc.arguments
+                        if let existing = streamingToolCalls[tc.index] {
+                            // Merge: replace with accumulated state from LLMService
+                            streamingToolCalls[tc.index] = ToolCall(
+                                id: tc.id.isEmpty ? existing.id : tc.id,
+                                name: tc.name.isEmpty ? existing.name : tc.name,
+                                arguments: tc.arguments
                             )
                         } else {
-                            collectedToolCalls.append(ToolCall(id: tc.id, name: tc.name, arguments: tc.arguments))
+                            streamingToolCalls[tc.index] = ToolCall(
+                                id: tc.id,
+                                name: tc.name,
+                                arguments: tc.arguments
+                            )
                         }
+                    }
+                    
+                    // Update the assistant message with current tool calls
+                    let currentToolCalls = Array(streamingToolCalls.values)
+                    if let lastIndex = messages.indices.last {
+                        messages[lastIndex].toolCalls = currentToolCalls
+                        messages[lastIndex].isStreaming = true
                     }
                 }
             }
@@ -246,12 +277,13 @@ final class AppState {
             }
             
             // Handle tool calls
-            if !collectedToolCalls.isEmpty {
-                logger.info("LLM requested \(collectedToolCalls.count) tool call(s)")
+            let finalToolCalls = Array(streamingToolCalls.values)
+            if !finalToolCalls.isEmpty {
+                logger.info("LLM requested \(finalToolCalls.count) tool call(s)")
                 if let lastIndex = messages.indices.last {
-                    messages[lastIndex].toolCalls = collectedToolCalls
+                    messages[lastIndex].toolCalls = finalToolCalls
                 }
-                await executeToolCalls(collectedToolCalls)
+                await executeToolCalls(finalToolCalls)
                 return
             }
             
@@ -282,6 +314,9 @@ final class AppState {
         for toolCall in toolCalls {
             userActivityOccurred()
             
+            // Set initial pending status
+            toolExecutionStatus[toolCall.id] = .pending
+            
             // Check if confirmation is needed
             if toolExecutor.requiresConfirmation(toolCall: toolCall) {
                 pendingToolConfirmation = ToolConfirmationRequest(
@@ -295,6 +330,7 @@ final class AppState {
                     onCancel: { [weak self] in
                         Task { @MainActor in
                             self?.pendingToolConfirmation = nil
+                            self?.toolExecutionStatus[toolCall.id] = .failed("User cancelled the tool execution.")
                             let result = ToolResult(toolCallId: toolCall.id, content: "User cancelled the tool execution.")
                             self?.addToolResult(result)
                         }
@@ -311,14 +347,18 @@ final class AppState {
     func executeSingleTool(_ toolCall: ToolCall) async {
         assistantState = .toolExecuting(name: toolCall.name)
         userActivityOccurred()
+        toolExecutionStatus[toolCall.id] = .running
         
         do {
             let result = try await toolExecutor.execute(toolCall: toolCall)
+            toolExecutionStatus[toolCall.id] = .completed(result.content)
             addToolResult(result)
         } catch {
+            let errorMessage = error.localizedDescription
+            toolExecutionStatus[toolCall.id] = .failed(errorMessage)
             let result = ToolResult(
                 toolCallId: toolCall.id,
-                content: "Error executing tool: \(error.localizedDescription)"
+                content: "Error executing tool: \(errorMessage)"
             )
             addToolResult(result)
         }
@@ -327,7 +367,8 @@ final class AppState {
     func addToolResult(_ result: ToolResult) {
         let toolMessage = ConversationMessage(
             role: .tool,
-            content: result.content
+            content: result.content,
+            toolCallId: result.toolCallId
         )
         messages.append(toolMessage)
         

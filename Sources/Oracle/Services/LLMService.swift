@@ -2,7 +2,7 @@ import Foundation
 
 struct LLMMessage: Codable {
     let role: String
-    let content: String
+    let content: String?
     var toolCalls: [LLMToolCall]? = nil
     var toolCallId: String? = nil
     
@@ -37,6 +37,7 @@ struct LLMDelta: Equatable {
 }
 
 struct ToolCallDelta: Equatable {
+    let index: Int
     let id: String
     let name: String
     let arguments: String
@@ -82,9 +83,14 @@ struct LLMService {
             "model": model.modelId,
             "messages": allMessages.map { msg in
                 var dict: [String: Any] = [
-                    "role": msg.role,
-                    "content": msg.content
+                    "role": msg.role
                 ]
+                // OpenAI requires content to be present (can be null for assistant with tool_calls)
+                if let content = msg.content {
+                    dict["content"] = content
+                } else {
+                    dict["content"] = NSNull()
+                }
                 if let toolCalls = msg.toolCalls {
                     dict["tool_calls"] = toolCalls.map { tc in
                         [
@@ -153,6 +159,7 @@ struct LLMService {
                     throw NetworkError.httpError(statusCode: httpResponse.statusCode, body: bodyString)
                 }
                 
+                // Track accumulated tool call state by index
                 var currentToolCalls: [Int: ToolCallDelta] = [:]
                 
                 for try await line in bytes.lines {
@@ -183,23 +190,30 @@ struct LLMService {
                         for tc in tcs {
                             guard let index = tc["index"] as? Int else { continue }
                             
-                            var current = currentToolCalls[index] ?? ToolCallDelta(id: "", name: "", arguments: "")
+                            var current = currentToolCalls[index] ?? ToolCallDelta(index: index, id: "", name: "", arguments: "")
+                            var didChange = false
                             
-                            if let id = tc["id"] as? String, !id.isEmpty {
-                                current = ToolCallDelta(id: id, name: current.name, arguments: current.arguments)
+                            if let id = tc["id"] as? String, !id.isEmpty, current.id != id {
+                                current = ToolCallDelta(index: index, id: id, name: current.name, arguments: current.arguments)
+                                didChange = true
                             }
                             
                             if let function = tc["function"] as? [String: Any] {
-                                if let name = function["name"] as? String, !name.isEmpty {
-                                    current = ToolCallDelta(id: current.id, name: name, arguments: current.arguments)
+                                if let name = function["name"] as? String, !name.isEmpty, current.name != name {
+                                    current = ToolCallDelta(index: index, id: current.id, name: name, arguments: current.arguments)
+                                    didChange = true
                                 }
-                                if let args = function["arguments"] as? String {
-                                    current = ToolCallDelta(id: current.id, name: current.name, arguments: current.arguments + args)
+                                if let args = function["arguments"] as? String, !args.isEmpty {
+                                    current = ToolCallDelta(index: index, id: current.id, name: current.name, arguments: current.arguments + args)
+                                    didChange = true
                                 }
                             }
                             
                             currentToolCalls[index] = current
-                            deltas.append(current)
+                            // Only yield if there was actual new data for this chunk
+                            if didChange {
+                                deltas.append(current)
+                            }
                         }
                         if !deltas.isEmpty {
                             toolCallDeltas = deltas
@@ -210,7 +224,7 @@ struct LLMService {
                         continuation.yield(LLMDelta(content: content, toolCalls: toolCallDeltas))
                     }
                     
-                    if let finishReason = firstChoice["finish_reason"] as? String, finishReason == "stop" {
+                    if let finishReason = firstChoice["finish_reason"] as? String, finishReason == "stop" || finishReason == "tool_calls" {
                         break
                     }
                 }
