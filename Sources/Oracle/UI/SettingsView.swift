@@ -57,7 +57,7 @@ struct SettingsView: View {
                 
                 HStack {
                     Text("Speed")
-                    Slider(value: $settings.speechSpeed, in: 0.8...1.5, step: 0.05)
+                    Slider(value: $settings.speechSpeed, in: 0.8...2.5, step: 0.05)
                     Text(String(format: "%.2fx", settings.speechSpeed))
                         .font(.caption)
                         .foregroundStyle(.secondary)
