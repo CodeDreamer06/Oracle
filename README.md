@@ -10,9 +10,7 @@
 
 ---
 
-I built Oracle because Siri failed me one too many times, and she never explained why. Voice is the most intimate interface we have — it deserves honesty, not a polite shrug. 🤍
-
-Oracle is a native macOS voice assistant that lives in your menu bar. Press a hotkey, speak, and it listens. It transcribes via the STT provider you choose, reasons through the LLM you trust, speaks back in a voice synthesized entirely on your Mac, and can take action through tools — but only when you say so, and never without showing its work. When something breaks, it tells you. No fallbacks, no fake confidence. 🛡️
+Oracle is a native macOS voice assistant that lives in your menu bar. Press a hotkey, speak, and it listens. Pick your own STT provider + LLM. Supertonic voices for TTS runs locally, on your device. It can fetch the weather, manage your calendar or code up a dashboard for you.
 
 ## What It Does
 
