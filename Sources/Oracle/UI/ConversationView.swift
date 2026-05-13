@@ -2,20 +2,21 @@ import SwiftUI
 
 struct ConversationView: View {
     let messages: [ConversationMessage]
+    let toolStatus: [String: ToolExecutionStatus]
     
     var body: some View {
         ScrollView {
             ScrollViewReader { proxy in
                 VStack(alignment: .leading, spacing: 12) {
-                    ForEach(messages) { message in
-                        MessageBubble(message: message)
+                    ForEach(visibleMessages) { message in
+                        MessageBubble(message: message, toolStatus: toolStatus)
                             .id(message.id)
                     }
                 }
                 .padding(.horizontal, 16)
                 .padding(.vertical, 12)
                 .onChange(of: messages.count) { _, _ in
-                    if let last = messages.last {
+                    if let last = visibleMessages.last {
                         withAnimation {
                             proxy.scrollTo(last.id, anchor: .bottom)
                         }
@@ -24,10 +25,16 @@ struct ConversationView: View {
             }
         }
     }
+    
+    // Hide raw tool result messages from the UI since results are shown inline in ToolCallView
+    private var visibleMessages: [ConversationMessage] {
+        messages.filter { $0.role != .tool }
+    }
 }
 
 struct MessageBubble: View {
     let message: ConversationMessage
+    let toolStatus: [String: ToolExecutionStatus]
     
     @ViewBuilder
     private var contentView: some View {
@@ -37,12 +44,12 @@ struct MessageBubble: View {
                 options: AttributedString.MarkdownParsingOptions(
                     interpretedSyntax: .inlineOnlyPreservingWhitespace
                 )
-            ) {
+            ), !message.content.isEmpty {
                 Text(attributed)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.primary)
                     .lineSpacing(2)
-            } else {
+            } else if !message.content.isEmpty {
                 Text(message.content)
                     .font(.system(size: 16, weight: .medium))
                     .foregroundStyle(.primary)
@@ -61,16 +68,13 @@ struct MessageBubble: View {
         HStack {
             if message.role == .user { Spacer(minLength: 40) }
             
-            VStack(alignment: .leading, spacing: 4) {
-                if let toolCalls = message.toolCalls {
+            VStack(alignment: .leading, spacing: 8) {
+                if let toolCalls = message.toolCalls, !toolCalls.isEmpty {
                     ForEach(toolCalls, id: \.id) { tc in
-                        HStack(spacing: 4) {
-                            Image(systemName: "hammer.fill")
-                                .font(.caption2)
-                            Text("Using \(tc.name)...")
-                                .font(.caption)
-                        }
-                        .foregroundStyle(.orange)
+                        ToolCallView(
+                            toolCall: tc,
+                            status: toolStatus[tc.id]
+                        )
                     }
                 }
                 

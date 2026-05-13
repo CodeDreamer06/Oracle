@@ -39,8 +39,11 @@ struct AssistantPanel: View {
                 
                 // Messages
                 if !appState.messages.isEmpty {
-                    ConversationView(messages: appState.messages)
-                        .frame(maxHeight: 280)
+                    ConversationView(
+                        messages: appState.messages,
+                        toolStatus: appState.toolExecutionStatus
+                    )
+                    .frame(maxHeight: 280)
                 }
                 
                 Spacer(minLength: 20)
