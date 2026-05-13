@@ -14,19 +14,37 @@ enum STTMode: String, Codable, CaseIterable, Identifiable {
     }
 }
 
+enum TTSMode: String, Codable, CaseIterable, Identifiable {
+    case supertonic
+    case api
+
+    var id: String { rawValue }
+
+    var displayName: String {
+        switch self {
+        case .supertonic: return "Supertonic (On-Device)"
+        case .api: return "API Provider"
+        }
+    }
+}
+
 @Observable
 @MainActor
 final class AppSettings {
     var providers: [Provider] = []
     var models: [AIModel] = []
-    var selectedVoice: String = "M2"
+    var selectedVoice: String = "F1"
     var selectedModelId: UUID?
-    var sttMode: STTMode = .api
+    var sttMode: STTMode = .macOSDefault
     var sttProviderId: UUID?
     var sttModel: String = "gpt-4o-transcribe"
+    var ttsMode: TTSMode = .supertonic
+    var ttsProviderId: UUID?
+    var ttsModel: String = "tts-1"
+    var ttsVoice: String = "alloy"
     var inactivityTimeout: Double = 30.0
     var totalStep: Int = 8
-    var speechSpeed: Float = 1.05
+    var speechSpeed: Float = 1.25
 
     private let providersKey = "oracle.providers"
     private let modelsKey = "oracle.models"
@@ -35,6 +53,10 @@ final class AppSettings {
     private let sttModeKey = "oracle.sttMode"
     private let sttProviderKey = "oracle.sttProviderId"
     private let sttModelKey = "oracle.sttModel"
+    private let ttsModeKey = "oracle.ttsMode"
+    private let ttsProviderKey = "oracle.ttsProviderId"
+    private let ttsModelKey = "oracle.ttsModel"
+    private let ttsVoiceKey = "oracle.ttsVoice"
     private let timeoutKey = "oracle.inactivityTimeout"
     private let totalStepKey = "oracle.totalStep"
     private let speedKey = "oracle.speechSpeed"
@@ -49,6 +71,7 @@ final class AppSettings {
             ]
             selectedModelId = models.first?.id
             sttProviderId = openai.id
+            ttsProviderId = openai.id
         }
     }
 
@@ -61,7 +84,7 @@ final class AppSettings {
            let decoded = try? JSONDecoder().decode([AIModel].self, from: data) {
             models = decoded
         }
-        selectedVoice = UserDefaults.standard.string(forKey: voiceKey) ?? "M2"
+        selectedVoice = UserDefaults.standard.string(forKey: voiceKey) ?? "F1"
         if let idString = UserDefaults.standard.string(forKey: modelIdKey),
            let id = UUID(uuidString: idString) {
             selectedModelId = id
@@ -75,11 +98,21 @@ final class AppSettings {
             sttProviderId = id
         }
         sttModel = UserDefaults.standard.string(forKey: sttModelKey) ?? "gpt-4o-transcribe"
+        if let rawTTSMode = UserDefaults.standard.string(forKey: ttsModeKey),
+           let mode = TTSMode(rawValue: rawTTSMode) {
+            ttsMode = mode
+        }
+        if let idString = UserDefaults.standard.string(forKey: ttsProviderKey),
+           let id = UUID(uuidString: idString) {
+            ttsProviderId = id
+        }
+        ttsModel = UserDefaults.standard.string(forKey: ttsModelKey) ?? "tts-1"
+        ttsVoice = UserDefaults.standard.string(forKey: ttsVoiceKey) ?? "alloy"
         inactivityTimeout = UserDefaults.standard.double(forKey: timeoutKey)
         if inactivityTimeout == 0 { inactivityTimeout = 30.0 }
         totalStep = UserDefaults.standard.integer(forKey: totalStepKey)
         if totalStep == 0 { totalStep = 8 }
-        speechSpeed = UserDefaults.standard.object(forKey: speedKey) as? Float ?? 1.05
+        speechSpeed = UserDefaults.standard.object(forKey: speedKey) as? Float ?? 1.25
     }
 
     func save() {
@@ -94,6 +127,10 @@ final class AppSettings {
         UserDefaults.standard.set(sttMode.rawValue, forKey: sttModeKey)
         UserDefaults.standard.set(sttProviderId?.uuidString, forKey: sttProviderKey)
         UserDefaults.standard.set(sttModel, forKey: sttModelKey)
+        UserDefaults.standard.set(ttsMode.rawValue, forKey: ttsModeKey)
+        UserDefaults.standard.set(ttsProviderId?.uuidString, forKey: ttsProviderKey)
+        UserDefaults.standard.set(ttsModel, forKey: ttsModelKey)
+        UserDefaults.standard.set(ttsVoice, forKey: ttsVoiceKey)
         UserDefaults.standard.set(inactivityTimeout, forKey: timeoutKey)
         UserDefaults.standard.set(totalStep, forKey: totalStepKey)
         UserDefaults.standard.set(speechSpeed, forKey: speedKey)
@@ -110,5 +147,9 @@ final class AppSettings {
 
     var sttProvider: Provider? {
         providers.first { $0.id == sttProviderId }
+    }
+
+    var ttsProvider: Provider? {
+        providers.first { $0.id == ttsProviderId }
     }
 }

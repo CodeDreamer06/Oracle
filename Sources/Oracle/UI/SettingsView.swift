@@ -9,17 +9,26 @@ struct SettingsView: View {
     @State private var editingProvider: Provider?
     @State private var editingModel: AIModel?
     
-    private let voices = [
+    private let supertonicVoices = [
         ("M1", "M1 — Lively, upbeat"),
-        ("M2", "M2 — Deep, robust (Default)"),
+        ("M2", "M2 — Deep, robust"),
         ("M3", "M3 — Polished, authoritative"),
         ("M4", "M4 — Soft, neutral"),
         ("M5", "M5 — Warm, soft-spoken"),
-        ("F1", "F1 — Calm, steady"),
+        ("F1", "F1 — Calm, steady (Default)"),
         ("F2", "F2 — Bright, cheerful"),
         ("F3", "F3 — Clear, professional"),
         ("F4", "F4 — Crisp, confident"),
         ("F5", "F5 — Kind, gentle")
+    ]
+
+    private let apiVoices = [
+        ("alloy", "Alloy — Versatile"),
+        ("echo", "Echo — Deep"),
+        ("fable", "Fable — Warm"),
+        ("onyx", "Onyx — Authoritative"),
+        ("nova", "Nova — Bright"),
+        ("shimmer", "Shimmer — Cheerful")
     ]
     
     var body: some View {
@@ -27,47 +36,100 @@ struct SettingsView: View {
         
         Form {
             Section {
-                HStack {
-                    Text("Voice")
-                    Spacer()
-                    Picker("", selection: $settings.selectedVoice) {
-                        ForEach(voices, id: \.0) { voice in
-                            Text(voice.1).tag(voice.0)
+                Picker("TTS Mode", selection: $settings.ttsMode) {
+                    ForEach(TTSMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
+                    }
+                }
+                .pickerStyle(.menu)
+
+                if settings.ttsMode == .supertonic {
+                    HStack {
+                        Text("Voice")
+                        Spacer()
+                        Picker("", selection: $settings.selectedVoice) {
+                            ForEach(supertonicVoices, id: \.0) { voice in
+                                Text(voice.1).tag(voice.0)
+                            }
+                        }
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(maxWidth: 250)
+
+                        Button {
+                            if appState.isPlayingVoiceDemo {
+                                appState.stopVoiceDemo()
+                            } else {
+                                Task { await appState.demoVoice() }
+                            }
+                        } label: {
+                            Image(systemName: appState.isPlayingVoiceDemo ? "pause.fill" : "play.fill")
+                        }
+                        .buttonStyle(.borderless)
+                    }
+
+                    Picker("Quality Steps", selection: $settings.totalStep) {
+                        Text("Fast (4)").tag(4)
+                        Text("Balanced (8)").tag(8)
+                        Text("High (10)").tag(10)
+                        Text("Ultra (15)").tag(15)
+                    }
+                    .pickerStyle(.menu)
+
+                    HStack {
+                        Text("Speed")
+                        Slider(value: $settings.speechSpeed, in: 0.8...2.5, step: 0.05)
+                        Text(String(format: "%.2fx", settings.speechSpeed))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 40)
+                    }
+                } else {
+                    Picker("TTS Provider", selection: $settings.ttsProviderId) {
+                        Text("None").tag(Optional<UUID>.none)
+                        ForEach(settings.providers) { provider in
+                            Text(provider.name).tag(Optional(provider.id))
                         }
                     }
                     .pickerStyle(.menu)
-                    .labelsHidden()
-                    .frame(maxWidth: 250)
-                    
-                    Button {
-                        if appState.isPlayingVoiceDemo {
-                            appState.stopVoiceDemo()
-                        } else {
-                            Task { await appState.demoVoice() }
+
+                    TextField("TTS Model ID", text: $settings.ttsModel)
+                        .textFieldStyle(.roundedBorder)
+
+                    HStack {
+                        Text("Voice")
+                        Spacer()
+                        Picker("", selection: $settings.ttsVoice) {
+                            ForEach(apiVoices, id: \.0) { voice in
+                                Text(voice.1).tag(voice.0)
+                            }
                         }
-                    } label: {
-                        Image(systemName: appState.isPlayingVoiceDemo ? "pause.fill" : "play.fill")
+                        .pickerStyle(.menu)
+                        .labelsHidden()
+                        .frame(maxWidth: 250)
+
+                        Button {
+                            if appState.isPlayingVoiceDemo {
+                                appState.stopVoiceDemo()
+                            } else {
+                                Task { await appState.demoVoice() }
+                            }
+                        } label: {
+                            Image(systemName: appState.isPlayingVoiceDemo ? "pause.fill" : "play.fill")
+                        }
+                        .buttonStyle(.borderless)
                     }
-                    .buttonStyle(.borderless)
+
+                    HStack {
+                        Text("Speed")
+                        Slider(value: $settings.speechSpeed, in: 0.25...4.0, step: 0.05)
+                        Text(String(format: "%.2fx", settings.speechSpeed))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                            .frame(width: 40)
+                    }
                 }
-                
-                Picker("Quality Steps", selection: $settings.totalStep) {
-                    Text("Fast (4)").tag(4)
-                    Text("Balanced (8)").tag(8)
-                    Text("High (10)").tag(10)
-                    Text("Ultra (15)").tag(15)
-                }
-                .pickerStyle(.menu)
-                
-                HStack {
-                    Text("Speed")
-                    Slider(value: $settings.speechSpeed, in: 0.8...2.5, step: 0.05)
-                    Text(String(format: "%.2fx", settings.speechSpeed))
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .frame(width: 40)
-                }
-                
+
                 HStack {
                     Text("Timeout")
                     Slider(value: $settings.inactivityTimeout, in: 10...120, step: 5)
@@ -77,7 +139,7 @@ struct SettingsView: View {
                         .frame(width: 40)
                 }
             } header: {
-                Text("Voice & Behavior")
+                Text("Text-to-Speech")
             }
             
             Section {

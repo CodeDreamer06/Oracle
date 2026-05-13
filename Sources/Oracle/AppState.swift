@@ -385,19 +385,31 @@ final class AppState {
         assistantState = .speaking
         userActivityOccurred()
         logger.info("Starting speech synthesis")
-        
+
         do {
-            let audioData = try await tts.synthesize(
-                text: text,
-                voiceStyle: settings.selectedVoice,
-                lang: "en",
-                totalStep: settings.totalStep,
-                speed: settings.speechSpeed
-            )
+            let audioData: Data
+            switch settings.ttsMode {
+            case .supertonic:
+                audioData = try await tts.synthesize(
+                    text: text,
+                    voiceStyle: settings.selectedVoice,
+                    lang: "en",
+                    totalStep: settings.totalStep,
+                    speed: settings.speechSpeed
+                )
+            case .api:
+                audioData = try await ExternalTTSService.synthesize(
+                    text: text,
+                    provider: settings.ttsProvider,
+                    model: settings.ttsModel,
+                    voice: settings.ttsVoice,
+                    speed: settings.speechSpeed
+                )
+            }
             try await audioPlayer.play(data: audioData)
             assistantState = .idle
             resetInactivityTimer()
-            
+
             // Auto-start listening for multi-turn conversations
             if isPanelVisible && !messages.isEmpty {
                 try? await Task.sleep(nanoseconds: 300_000_000)
@@ -420,15 +432,27 @@ final class AppState {
         logger.info("Playing voice demo")
         isPlayingVoiceDemo = true
         defer { isPlayingVoiceDemo = false }
-        
+
         do {
-            let audioData = try await tts.synthesize(
-                text: demoText,
-                voiceStyle: settings.selectedVoice,
-                lang: "en",
-                totalStep: settings.totalStep,
-                speed: settings.speechSpeed
-            )
+            let audioData: Data
+            switch settings.ttsMode {
+            case .supertonic:
+                audioData = try await tts.synthesize(
+                    text: demoText,
+                    voiceStyle: settings.selectedVoice,
+                    lang: "en",
+                    totalStep: settings.totalStep,
+                    speed: settings.speechSpeed
+                )
+            case .api:
+                audioData = try await ExternalTTSService.synthesize(
+                    text: demoText,
+                    provider: settings.ttsProvider,
+                    model: settings.ttsModel,
+                    voice: settings.ttsVoice,
+                    speed: settings.speechSpeed
+                )
+            }
             try await audioPlayer.play(data: audioData)
         } catch {
             logger.error("Voice demo failed: \(error.localizedDescription)")

@@ -32,6 +32,7 @@
 		F49E5F2EA809BFBA87FD14DF /* ConversationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35249DFDDE66E5CCE6FA617A /* ConversationView.swift */; };
 		F9F89344E67F44C7F76AE4E4 /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 008AA860BA39E9D5BDF16C28 /* Provider.swift */; };
 		FA908F0A178CB9C19186C4EB /* MultipartBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2803A1103108A00A4FD3011C /* MultipartBuilder.swift */; };
+		FB6E084CAF7881AF0DDEEDF4 /* ExternalTTSService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AED31A8658BE3E3E7FA71BA7 /* ExternalTTSService.swift */; };
 		FF1C53045BD9268689E00496 /* SupertonicTTS.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2D8827A722CA5B37E8B15558 /* SupertonicTTS.swift */; };
 		FF647250DFEABD20B777FCD5 /* AssistantState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 50C4816C78CEB75AF188A729 /* AssistantState.swift */; };
 /* End PBXBuildFile section */
@@ -58,6 +59,7 @@
 		88496A88E80D7748F2A634DE /* AssistantPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantPanel.swift; sourceTree = "<group>"; };
 		8DD0F4FA4A6CD4F0CF92551E /* AudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioRecorder.swift; sourceTree = "<group>"; };
 		9DB642AF744047996418DB30 /* OracleApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OracleApp.swift; sourceTree = "<group>"; };
+		AED31A8658BE3E3E7FA71BA7 /* ExternalTTSService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExternalTTSService.swift; sourceTree = "<group>"; };
 		C00A07FCC8C1157A4E728F94 /* OrbView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OrbView.swift; sourceTree = "<group>"; };
 		C106831E22C6DD06266F7BD5 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		D9F4D787500DD346B3E94724 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
@@ -102,6 +104,7 @@
 			children = (
 				FA7055B6509C2E5534F0317D /* AudioPlayerService.swift */,
 				8DD0F4FA4A6CD4F0CF92551E /* AudioRecorder.swift */,
+				AED31A8658BE3E3E7FA71BA7 /* ExternalTTSService.swift */,
 				2E2AF3EC43670425A01AF88A /* HotkeyManager.swift */,
 				C106831E22C6DD06266F7BD5 /* LLMService.swift */,
 				754A1A5A5C4A85A90C3432F5 /* SpeechRecognitionService.swift */,
@@ -260,6 +263,7 @@
 				19EDA09C9FD7AE150B636C64 /* AudioRecorder.swift in Sources */,
 				252D103E25718BD7D0F69D75 /* Conversation.swift in Sources */,
 				F49E5F2EA809BFBA87FD14DF /* ConversationView.swift in Sources */,
+				FB6E084CAF7881AF0DDEEDF4 /* ExternalTTSService.swift in Sources */,
 				29A2E8EB75899A69FB63AA86 /* HotkeyManager.swift in Sources */,
 				2193DF6CE474A9492312862F /* KeychainHelper.swift in Sources */,
 				A384A01F2790371DB7C0CC09 /* LLMService.swift in Sources */,
