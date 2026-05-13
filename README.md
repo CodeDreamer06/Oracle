@@ -1,185 +1,135 @@
-# Oracle
+<p align="center">
+  <img src="Resources/banner.png" alt="Oracle Banner" width="100%">
+</p>
 
-A gorgeous, native macOS voice assistant — an open alternative to Siri. Speak naturally, and Oracle listens, thinks, speaks back, and can take action on your Mac using tools.
+<p align="center">
+  <img src="https://img.shields.io/badge/macOS-15.0+-0A84FF?style=flat-square&logo=apple&logoColor=white">
+  <img src="https://img.shields.io/badge/Swift-6-F05138?style=flat-square&logo=swift&logoColor=white">
+  <img src="https://img.shields.io/badge/License-MIT-green?style=flat-square">
+</p>
 
-![macOS 15+](https://img.shields.io/badge/macOS-15.0+-blue)
-![Swift 6](https://img.shields.io/badge/Swift-6-orange)
+---
+
+I built Oracle because I was tired of asking Siri to do something simple and watching her fail silently. She would misunderstand, or give up, or offer me a web search with the confidence of a concierge who has never heard of Google. The worst part wasn't the failure — it was the *opacity*. I never knew what she heard, what she thought, or why she gave up. Voice is the most intimate interface we have. It deserves honesty. 🤍
+
+Oracle is a native macOS voice assistant that sits in your menu bar and listens when you call. It is not a product. It is a piece of software I wrote because I believe the computer on my desk should understand me when I speak, should tell me when it is confused, and should never pretend everything is fine while doing nothing at all.
+
+## Why Not Just Use Siri?
+
+Siri is a black box wrapped in a pleasant voice. She lives inside Apple's ecosystem, answers to Apple's priorities, and when she cannot help, she apologizes in ways that teach us to lower our expectations. I wanted something different. I wanted an assistant that uses the LLM I choose, the voice I prefer, and the tools I have already built on my machine. I wanted an assistant that errs loudly rather than failing quietly — because a tool that lies about its competence is worse than no tool at all.
+
+Oracle is open. Its brain is whichever OpenAI-compatible API you point it at. Its ears are Whisper or whatever STT provider you trust. Its voice is synthesized on your Mac via [Supertonic](https://github.com/supertone-inc/supertonic), so your words never leave the machine to become speech. It can search the web, read your files, run shell commands, and control your Mac with AppleScript — but only when you say so, and never without showing its work. 🛡️
+
+## What It Feels Like
+
+Press `Cmd+Shift+Space`. A floating orb appears in the top-right corner of your screen, pulsing with a mesh gradient that shifts between purple and blue like something alive. Start talking. The orb turns green and breathes with your voice. Stop talking, and after two seconds of silence it thinks — the orb turns orange, spins — then speaks back in a deep, synthetic voice that lives entirely on your hardware.
+
+The conversation stays open. Ask a follow-up. Refer to what it just said. The orb remembers, because the conversation is yours, not a transaction to be discarded. When you are done, press Escape, click away, or simply wait. It fades.
 
 ## Features
 
-### Voice-First Interface
-- **Siri-like floating orb UI** with gorgeous mesh-gradient animations
-- **Global hotkey** activation (default: `Cmd+Shift+Space`, fully configurable)
-- **Touch Bar button** on supported MacBooks for one-tap activation
-- **Auto-listening** when the panel opens — just start talking
-- **Auto-silence detection** stops listening after 2 seconds of quiet
+**Voice-First Interface**
+- Global hotkey activation (default `Cmd+Shift+Space`, fully configurable)
+- Touch Bar button on supported MacBooks
+- Auto-listens when the panel opens — no clicking, no awkward pauses
+- Auto-silence detection stops recording after 2 seconds of quiet
+- Multi-turn conversations that persist for the entire session
 
-### Multi-Turn Conversations
-Oracle keeps conversation context for the entire session. Ask follow-up questions, refer to previous answers, and have natural back-and-forth dialog. The conversation resets when the panel is dismissed or after the inactivity timeout.
+**On-Device Speech Synthesis**
+- Lightning-fast TTS via Supertonic ONNX Runtime, fully private
+- 10 voices: M1–M5, F1–F5 (default: M2, a deep male voice)
+- Configurable quality steps and speech speed
+- Zero network calls for speech generation
 
-### On-Device Text-to-Speech (Supertonic)
-- **Lightning-fast, on-device synthesis** via [Supertonic](https://github.com/supertone-inc/supertonic) ONNX Runtime
-- **Default voice: M2** (deep, robust male)
-- **10 voices available**: M1–M5 (male), F1–F5 (female)
-- Configurable quality steps (4–15) and speech speed
-- No cloud dependency, fully private
+**Configurable Intelligence**
+- Any OpenAI-compatible LLM provider (OpenAI, OpenRouter, local Ollama)
+- Multiple models per provider
+- Streaming responses with real-time display
+- API keys stored in the macOS Keychain, never in plain text
 
-### API-Based Speech-to-Text
-- Uses configurable API providers (OpenAI Whisper, GPT-4o-transcribe, or any compatible endpoint)
-- Recorded audio is sent securely to your chosen STT endpoint
-- Planned upgrade path to on-device Voxtral Small in the future
+**It Can Act**
+- `web_search` — Search via DuckDuckGo
+- `fetch_url` — Read web pages
+- `execute_shell` — Run shell commands (destructive ones require your confirmation)
+- `run_applescript` — Automate macOS apps
+- `list_directory` & `read_file` — Browse and read your files
 
-### Configurable LLM Providers
-- Add any **OpenAI-compatible API** provider with custom base URL
-- Support for **multiple models per provider**
-- API keys stored securely in the macOS Keychain
-- Full streaming responses with real-time transcription display
-
-### Tool Use — Oracle Can Do Things
-Oracle can invoke tools to help you. Before any destructive action, Oracle asks for your confirmation.
-
-Available tools:
-- **`web_search`** — Search the web via DuckDuckGo
-- **`fetch_url`** — Fetch and read web page content
-- **`execute_shell`** — Execute shell commands (destructive commands require confirmation)
-- **`run_applescript`** — Control macOS apps and system features
-- **`list_directory`** — Browse files and folders
-- **`read_file`** — Read text file contents
-
-### No Fallbacks — Clear Errors Everywhere
-If anything goes wrong, Oracle **shows the error** instead of silently failing:
-- TTS executable missing? Clear error banner with fix instructions.
-- LLM API returned 401? Error shown with the HTTP response.
-- Microphone permission denied? Guided message to System Settings.
-- Tool execution failed? Error details returned to the conversation.
-
-### Smart Session Management
-- Panel **stays open** after responding so you can continue the conversation
-- **Auto-dismiss** after configurable inactivity timeout (default: 30s)
-- Press `Escape` or click outside to dismiss manually
+**No Fallbacks**
+Every failure surfaces as a clear error banner. Missing binary, API error, permission denied — you see exactly what went wrong. Oracle does not pretend to understand when it does not. That is the whole point.
 
 ## Architecture
 
 ```
 Oracle/
 ├── Sources/Oracle/
-│   ├── Models/              # Data models (Provider, AIModel, Conversation, Tools)
-│   ├── Services/            # Core services (TTS, STT, LLM, Audio, Tools)
-│   ├── UI/                  # SwiftUI views (Orb, Panel, Settings, Touch Bar)
-│   ├── Utils/               # Keychain, networking, multipart form builder
-│   ├── AppState.swift       # Central @Observable state coordinator
-│   └── OracleApp.swift      # App entry, MenuBarExtra, window management
+│   ├── Models/              # Providers, models, conversations, tools
+│   ├── Services/            # TTS, STT, LLM, audio, hotkeys
+│   ├── UI/                  # Orb, panel, settings, touch bar
+│   ├── Utils/               # Keychain, networking, multipart builder
+│   ├── AppState.swift       # @Observable @MainActor coordinator
+│   └── OracleApp.swift      # LSUIElement entry point
 ├── Resources/
-│   ├── Info.plist           # LSUIElement app configuration
-│   └── Oracle.entitlements  # Sandboxing + permissions
-├── setup.sh                 # One-command setup script
-└── project.yml              # XcodeGen project specification
+│   ├── Info.plist           # Menu bar app configuration
+│   ├── Oracle.entitlements  # Sandboxing + permissions
+│   └── supertonic/          # Bundled ONNX TTS models
+├── setup.sh                 # One-command setup
+└── project.yml              # XcodeGen specification
 ```
 
-## Requirements
-
-- **macOS 15.0+** (for MeshGradient and modern SwiftUI)
-- **Xcode 16+** with Swift 6
-- **Homebrew** (for git-lfs, xcodegen)
-- **Git with LFS** (for downloading Supertonic models)
+`AppState` is the single source of truth. It orchestrates the entire pipeline — listening, transcribing, streaming LLM responses, executing tools, speaking, and listening again — all without blocking the main thread. The UI is pure SwiftUI with `MeshGradient`, glassmorphism, and `VisualEffectBlur`. No UIKit bridges, no compromises.
 
 ## Setup
 
-### 1. Clone this repository
+You need macOS 15.0+, Xcode 16, and Homebrew.
 
 ```bash
 git clone <your-repo-url> oracle
 cd oracle
-```
-
-### 2. Run the setup script
-
-```bash
 ./setup.sh
 ```
 
-This will:
-- Install `xcodegen` and `git-lfs` (via Homebrew)
-- Clone the [Supertonic](https://github.com/supertone-inc/supertonic) repository
-- Download ONNX models and voice styles from HuggingFace (~100MB)
-- Build the Supertonic Swift executable
-- Generate `Oracle.xcodeproj`
-
-### 3. Open in Xcode and configure
+This installs dependencies, clones Supertonic, downloads ONNX models (~100MB), builds the TTS executable, and generates `Oracle.xcodeproj`.
 
 ```bash
 open Oracle.xcodeproj
 ```
 
-- Select your **Development Team** for code signing
-- Build and run (`Cmd+R`)
+Select your development team, build, and run.
 
-### 4. Configure providers
-
-On first launch:
-1. Click the **Oracle icon** in your menu bar
-2. Select **Settings...**
-3. Add your LLM provider (e.g., OpenAI, OpenRouter, local Ollama)
-4. Add models for that provider
-5. Set your **STT provider** and model ID (e.g., `whisper-1` or `gpt-4o-transcribe`)
-6. Customize your **voice**, **hotkey**, and **behavior**
+On first launch, open **Settings** from the menu bar, add your LLM and STT providers, and choose a voice. Then press `Cmd+Shift+Space` and talk.
 
 ## Usage
 
 | Action | How |
 |--------|-----|
-| Activate Oracle | `Cmd+Shift+Space` (default) or click menu bar icon |
-| Start talking | Oracle auto-listens when the panel appears |
-| Stop talking | Silence for 2 seconds auto-submits, or tap the orb |
-| Dismiss | `Escape`, click outside, or wait for inactivity timeout |
-| Open Settings | Menu bar → Settings... (`Cmd+,`) |
-| Touch Bar | Tap the waveform orb button |
-
-## Customization
-
-### Changing the Global Hotkey
-Go to **Settings → Shortcuts** and record a new global shortcut. The default is `Cmd+Shift+Space`.
-
-### Adding LLM Providers
-Go to **Settings → LLM Providers → Add Provider**. Enter:
-- **Name**: Display name (e.g., "OpenRouter")
-- **Base URL**: API base URL (e.g., `https://openrouter.ai/api/v1`)
-- **API Key**: Your API key (stored in Keychain)
-
-Then add models under **Settings → Models**.
-
-### Changing Voice
-Go to **Settings → Voice & Behavior** and select from M1–M5 / F1–F5.
-
-### Adjusting Quality vs Speed
-- **Fast (4 steps)**: Quickest response, slightly lower fidelity
-- **Balanced (8 steps)**: Default, good trade-off
-- **High (10 steps)**: Better quality
-- **Ultra (15 steps)**: Best quality, slower
+| Activate | `Cmd+Shift+Space` or click the menu bar icon |
+| Talk | Starts automatically when the panel opens |
+| Stop | Silence for 2s auto-submits, or tap the orb |
+| Dismiss | `Escape`, click outside, or wait for timeout |
+| Settings | Menu bar → Settings (`Cmd+,`) |
+| Touch Bar | Tap the waveform orb |
 
 ## Security
 
-- **API keys** are stored in the macOS Keychain, never in UserDefaults or plain text
-- **Destructive shell commands** (rm, mv, dd, etc.) require explicit user confirmation
-- The app runs in the **App Sandbox** with hardened runtime
-- All TTS inference happens **on-device** — your text never leaves your Mac for speech synthesis
+- API keys live in the macOS Keychain
+- Destructive commands require explicit confirmation
+- TTS runs entirely on-device
+- Sandboxed with hardened runtime
 
 ## Roadmap
 
 - [ ] On-device STT (Voxtral Small or Whisper.cpp)
 - [ ] Custom wake word / always-listening mode
-- [ ] Conversation persistence (optional)
-- [ ] More tool integrations (Calendar, Reminders, Spotify, etc.)
+- [ ] Conversation persistence
+- [ ] More tools: Calendar, Reminders, Spotify
 - [ ] Vision capabilities (screen understanding)
 - [ ] Plugin system for custom tools
 
 ## Acknowledgments
 
-- **TTS**: [Supertonic](https://github.com/supertone-inc/supertonic) by Supertone Inc. — lightning-fast on-device TTS
-- **Hotkeys**: [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) by Sindre Sorhus
-- **ONNX Runtime**: Microsoft
+- [Supertonic](https://github.com/supertone-inc/supertonic) by Supertone Inc. — for proving on-device TTS can be beautiful
+- [KeyboardShortcuts](https://github.com/sindresorhus/KeyboardShortcuts) by Sindre Sorhus — for effortless global hotkeys
 
 ## License
 
-MIT License — see LICENSE for details.
-Supertonic models are released under the OpenRAIL-M License.
+MIT License. Supertonic models are released under the OpenRAIL-M License.
