@@ -60,10 +60,9 @@ struct OrbView: View {
     }
     
     var body: some View {
-        TimelineView(.animation(minimumInterval: 1/60)) { _ in
-            ZStack {
-                // Outer glow rings
-                ForEach(0..<3) { i in
+        ZStack {
+            // Outer glow rings
+            ForEach(0..<3) { i in
                     Circle()
                         .fill(
                             MeshGradient(
@@ -136,6 +135,7 @@ struct OrbView: View {
                 }
             }
         }
+        .drawingGroup()
         .onAppear {
             withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
                 pulsePhase = 1.0
@@ -149,6 +149,6 @@ struct OrbView: View {
     private func pulseAnimation(for index: Int) -> CGFloat {
         let offset = Double(index) * 0.5
         let value = sin((pulsePhase + offset) * .pi * 2)
-        return CGFloat(value * 0.05)
+        return CGFloat(value * 0.08)
     }
 }
