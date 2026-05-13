@@ -29,6 +29,34 @@ struct ConversationView: View {
 struct MessageBubble: View {
     let message: ConversationMessage
     
+    @ViewBuilder
+    private var contentView: some View {
+        if message.role == .assistant {
+            if let attributed = try? AttributedString(
+                markdown: message.content,
+                options: AttributedString.MarkdownParsingOptions(
+                    interpretedSyntax: .inlineOnlyPreservingWhitespace
+                )
+            ) {
+                Text(attributed)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineSpacing(2)
+            } else {
+                Text(message.content)
+                    .font(.system(size: 16, weight: .medium))
+                    .foregroundStyle(.primary)
+                    .lineSpacing(2)
+            }
+        } else {
+            Text(message.content)
+                .font(.system(size: message.role == .user ? 15 : 16))
+                .fontWeight(message.role == .user ? .regular : .medium)
+                .foregroundStyle(.primary)
+                .lineSpacing(2)
+        }
+    }
+    
     var body: some View {
         HStack {
             if message.role == .user { Spacer(minLength: 40) }
@@ -46,11 +74,7 @@ struct MessageBubble: View {
                     }
                 }
                 
-                Text(message.content)
-                    .font(.system(size: message.role == .user ? 15 : 16))
-                    .fontWeight(message.role == .user ? .regular : .medium)
-                    .foregroundStyle(message.role == .user ? .primary : .primary)
-                    .lineSpacing(2)
+                contentView
                 
                 if message.isStreaming {
                     HStack(spacing: 4) {
