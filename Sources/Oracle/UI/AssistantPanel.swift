@@ -43,10 +43,10 @@ struct AssistantPanel: View {
                         messages: appState.messages,
                         toolStatus: appState.toolExecutionStatus
                     )
-                    .frame(maxHeight: 280)
+                    .frame(maxHeight: 320)
                 }
                 
-                Spacer(minLength: 20)
+                Spacer(minLength: 12)
                 
                 // Tool confirmation
                 if let confirmation = appState.pendingToolConfirmation {
@@ -55,11 +55,11 @@ struct AssistantPanel: View {
                         .transition(.scale.combined(with: .opacity))
                 }
                 
-                Spacer(minLength: 20)
+                Spacer(minLength: 12)
                 
                 // Orb
                 OrbView(state: appState.assistantState)
-                    .frame(width: 260, height: 260)
+                    .frame(width: 200, height: 200)
                     .onTapGesture {
                         Task {
                             switch appState.assistantState {
