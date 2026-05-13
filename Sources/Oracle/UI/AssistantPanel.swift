@@ -83,6 +83,17 @@ struct AssistantPanel: View {
             RoundedRectangle(cornerRadius: 32, style: .continuous)
                 .stroke(.white.opacity(0.08), lineWidth: 0.8)
         )
+        .overlay(alignment: .topTrailing) {
+            Button(action: { appState.dismissPanel() }) {
+                Image(systemName: "xmark.circle.fill")
+                    .font(.system(size: 18, weight: .medium))
+                    .foregroundStyle(.secondary.opacity(0.5))
+            }
+            .buttonStyle(.plain)
+            .padding(.top, 14)
+            .padding(.trailing, 14)
+            .contentShape(Rectangle())
+        }
     }
 }
 
