@@ -11,7 +11,7 @@ targets:
     sources:
       - path: Sources/Oracle
     resources:
-      - path: Resources
+      - Resources
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.abhinav.oracle
@@ -20,9 +20,17 @@ targets:
         ENABLE_HARDENED_RUNTIME: YES
         SWIFT_VERSION: "6.0"
         GENERATE_INFOPLIST_FILE: NO
+    preBuildScripts:
+      - name: Copy Supertonic Resources
+        script: |
+          if [ -d "${SRCROOT}/Resources/supertonic" ]; then
+            mkdir -p "${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/supertonic"
+            cp -R "${SRCROOT}/Resources/supertonic/"* "${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/supertonic/"
+          fi
     dependencies:
       - package: KeyboardShortcuts
         product: KeyboardShortcuts
+      - sdk: Speech.framework
 packages:
   KeyboardShortcuts:
     url: https://github.com/sindresorhus/KeyboardShortcuts

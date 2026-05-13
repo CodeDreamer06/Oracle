@@ -82,6 +82,9 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     func setupWindow() {
         guard let state = appState else { return }
         windowController = AssistantWindowController(appState: state)
+        state.onPanelDismissed = { [weak self] in
+            self?.windowController?.hidePanel()
+        }
     }
     
     func togglePanel() {

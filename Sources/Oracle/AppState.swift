@@ -12,6 +12,7 @@ final class AppState {
     var isPanelVisible = false
     var currentError: OracleError?
     var pendingToolConfirmation: ToolConfirmationRequest?
+    var onPanelDismissed: (() -> Void)? = nil
     
     let settings = AppSettings()
     private let audioRecorder = AudioRecorder()
@@ -46,6 +47,7 @@ final class AppState {
         audioPlayer.stop()
         messages.removeAll()
         assistantState = .idle
+        onPanelDismissed?()
     }
     
     func resetInactivityTimer() {
@@ -127,7 +129,7 @@ final class AppState {
     func finishListening() async {
         logger.info("Finishing listening, beginning transcription")
         stopListening()
-        assistantState = .transcribing
+        assistantState = .transcribing(preview: "")
         userActivityOccurred()
         
         guard let audioURL = audioRecorder.recordedFileURL else {
@@ -141,7 +143,14 @@ final class AppState {
             let text: String
             switch settings.sttMode {
             case .macOSDefault:
-                text = try await SpeechRecognitionService.transcribeWithMacOS(audioURL: audioURL)
+                let stream = SpeechRecognitionService.transcribeWithMacOSStream(audioURL: audioURL)
+                var finalText = ""
+                for try await partial in stream {
+                    finalText = partial
+                    assistantState = .transcribing(preview: partial)
+                    userActivityOccurred()
+                }
+                text = finalText
             case .api:
                 text = try await SpeechRecognitionService.transcribe(
                     audioURL: audioURL,

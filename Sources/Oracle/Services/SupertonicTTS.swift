@@ -29,6 +29,7 @@ enum TTSError: Error, LocalizedError {
 final class SupertonicTTS: @unchecked Sendable {
     private func findExecutable() -> URL? {
         let paths: [URL] = [
+            Bundle.main.url(forResource: "example_onnx", withExtension: nil, subdirectory: "supertonic"),
             URL(fileURLWithPath: "../supertonic/swift/.build/release/example_onnx"),
             Bundle.main.url(forResource: "example_onnx", withExtension: nil),
             URL(fileURLWithPath: FileManager.default.homeDirectoryForCurrentUser.path)
@@ -40,6 +41,7 @@ final class SupertonicTTS: @unchecked Sendable {
 
     private func findAssetsDir() -> URL? {
         let paths: [URL] = [
+            Bundle.main.url(forResource: "assets", withExtension: nil, subdirectory: "supertonic"),
             URL(fileURLWithPath: "../supertonic/assets"),
             Bundle.main.url(forResource: "assets", withExtension: nil),
             URL(fileURLWithPath: FileManager.default.homeDirectoryForCurrentUser.path)

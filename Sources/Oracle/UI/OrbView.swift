@@ -134,7 +134,6 @@ struct OrbView: View {
                         .frame(width: 120 + CGFloat(volumeScale * 60), height: 120 + CGFloat(volumeScale * 60))
                 }
         }
-        .drawingGroup()
         .onAppear {
             withAnimation(.easeInOut(duration: 2.0).repeatForever(autoreverses: true)) {
                 pulsePhase = 1.0

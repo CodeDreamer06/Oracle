@@ -12,8 +12,7 @@ struct VisualEffectBlur: NSViewRepresentable {
         view.blendingMode = blendingMode
         view.state = state
         view.wantsLayer = true
-        view.layer?.cornerRadius = 28
-        view.layer?.cornerCurve = .continuous
+        view.autoresizingMask = [.width, .height]
         return view
     }
     

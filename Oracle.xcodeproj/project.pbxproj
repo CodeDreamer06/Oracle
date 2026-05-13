@@ -22,6 +22,7 @@
 		68E6DE4113669088D5B55085 /* ToolDefinition.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0A8162DDD65568A7DDC34E8 /* ToolDefinition.swift */; };
 		8BFA584037AC77DF533C6035 /* KeyboardShortcuts in Frameworks */ = {isa = PBXBuildFile; productRef = 729F4CF9B2F3F698E9EC1F5D /* KeyboardShortcuts */; };
 		A384A01F2790371DB7C0CC09 /* LLMService.swift in Sources */ = {isa = PBXBuildFile; fileRef = C106831E22C6DD06266F7BD5 /* LLMService.swift */; };
+		A41AD786AD39412E1C380335 /* Speech.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = F01D5B634C4843259096DD9B /* Speech.framework */; };
 		AAB9252C3C6691AD22C385B1 /* AIModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 69EF98793C70841CBFE8CB3E /* AIModel.swift */; };
 		B898188CA8741CC72465E907 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5CB241147D1C15D46E6027F8 /* AppSettings.swift */; };
 		D5112090BB4040284B60FA6F /* OrbView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C00A07FCC8C1157A4E728F94 /* OrbView.swift */; };
@@ -59,6 +60,7 @@
 		C106831E22C6DD06266F7BD5 /* LLMService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LLMService.swift; sourceTree = "<group>"; };
 		D9F4D787500DD346B3E94724 /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
 		E0A8162DDD65568A7DDC34E8 /* ToolDefinition.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolDefinition.swift; sourceTree = "<group>"; };
+		F01D5B634C4843259096DD9B /* Speech.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Speech.framework; path = System/Library/Frameworks/Speech.framework; sourceTree = SDKROOT; };
 		FA7055B6509C2E5534F0317D /* AudioPlayerService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioPlayerService.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -68,12 +70,21 @@
 			buildActionMask = 2147483647;
 			files = (
 				8BFA584037AC77DF533C6035 /* KeyboardShortcuts in Frameworks */,
+				A41AD786AD39412E1C380335 /* Speech.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		086A79F2DC4BAC133CED3D75 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				F01D5B634C4843259096DD9B /* Speech.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		6C4037C30B5EBFAB456B626A /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -136,6 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				EFB41A97CB4217293D319B11 /* Oracle */,
+				086A79F2DC4BAC133CED3D75 /* Frameworks */,
 				9E12A2199D58E2CD91A7455B /* Products */,
 			);
 			sourceTree = "<group>";
@@ -161,6 +173,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 01AC4681418782C9779F061C /* Build configuration list for PBXNativeTarget "Oracle" */;
 			buildPhases = (
+				6EE50F5F47F7664F4372CA90 /* Copy Supertonic Resources */,
 				29A23BBF5B1285908317617C /* Sources */,
 				6E652C767683F664B364316F /* Frameworks */,
 			);
@@ -208,6 +221,27 @@
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6EE50F5F47F7664F4372CA90 /* Copy Supertonic Resources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Copy Supertonic Resources";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if [ -d \"${SRCROOT}/Resources/supertonic\" ]; then\n  mkdir -p \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/supertonic\"\n  cp -R \"${SRCROOT}/Resources/supertonic/\"* \"${BUILT_PRODUCTS_DIR}/${UNLOCALIZED_RESOURCES_FOLDER_PATH}/supertonic/\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		29A23BBF5B1285908317617C /* Sources */ = {

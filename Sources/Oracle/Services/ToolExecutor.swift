@@ -1,4 +1,5 @@
 import Foundation
+import CoreServices
 
 enum ToolExecutionError: Error, LocalizedError {
     case unknownTool(String)
@@ -212,18 +213,47 @@ struct ToolExecutor {
     }
     
     // MARK: - AppleScript
-    
+
+    private func checkAppleEventsPermission() -> Bool {
+        // Check automation permission for System Events (most common AppleScript target)
+        var targetDesc = AEDesc()
+        let bundleID = "com.apple.systemevents"
+        let status = AECreateDesc(
+            typeApplicationBundleID,
+            bundleID,
+            bundleID.utf8.count,
+            &targetDesc
+        )
+        guard status == noErr else { return false }
+        defer { AEDisposeDesc(&targetDesc) }
+
+        let permission = AEDeterminePermissionToAutomateTarget(
+            &targetDesc,
+            typeWildCard,
+            typeWildCard,
+            false // Don't prompt — just check current status
+        )
+        return permission == noErr || permission == procNotFound
+    }
+
     private func runAppleScript(script: String) async throws -> String {
         #if os(macOS)
+        guard checkAppleEventsPermission() else {
+            throw ToolExecutionError.appleScriptFailed(
+                "Oracle does not have permission to control other apps via AppleScript. " +
+                "Please enable it in System Settings > Privacy & Security > Automation."
+            )
+        }
+
         let appleScript = NSAppleScript(source: script)
         var errorInfo: NSDictionary?
         let result = appleScript?.executeAndReturnError(&errorInfo)
-        
+
         if let errorInfo = errorInfo {
             let errorMsg = errorInfo[NSAppleScript.errorMessage] as? String ?? "Unknown AppleScript error"
             throw ToolExecutionError.appleScriptFailed(errorMsg)
         }
-        
+
         return result?.stringValue ?? "AppleScript executed successfully."
         #else
         throw ToolExecutionError.appleScriptFailed("AppleScript is only available on macOS")

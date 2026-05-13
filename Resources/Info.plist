@@ -26,5 +26,7 @@
     <string>Oracle needs microphone access to listen for your voice commands.</string>
     <key>NSAppleEventsUsageDescription</key>
     <string>Oracle uses AppleScript to control apps and perform tasks on your Mac.</string>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>Oracle uses speech recognition to transcribe your voice commands. When using macOS Default, audio is processed on-device.</string>
 </dict>
 </plist>

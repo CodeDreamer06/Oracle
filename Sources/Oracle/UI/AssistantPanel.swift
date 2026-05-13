@@ -9,8 +9,8 @@ struct AssistantPanel: View {
             return appState.messages.isEmpty ? "Tap the orb or speak" : "Listening..."
         case .listening:
             return "Listening..."
-        case .transcribing:
-            return "Transcribing..."
+        case .transcribing(let preview):
+            return preview.isEmpty ? "Transcribing..." : preview
         case .thinking:
             return "Thinking..."
         case .speaking:
@@ -23,8 +23,12 @@ struct AssistantPanel: View {
     var body: some View {
         ZStack {
             VisualEffectBlur(material: .hudWindow)
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
             
             VStack(spacing: 0) {
+                // Top padding to clear the close button
+                Color.clear
+                    .frame(height: 12)
                 // Error banner
                 if let error = appState.currentError {
                     ErrorBanner(error: error) {
@@ -52,7 +56,7 @@ struct AssistantPanel: View {
                 
                 // Orb
                 OrbView(state: appState.assistantState)
-                    .frame(width: 140, height: 140)
+                    .frame(width: 260, height: 260)
                     .onTapGesture {
                         Task {
                             switch appState.assistantState {
@@ -79,9 +83,29 @@ struct AssistantPanel: View {
         .frame(width: 520, height: 520)
         .clipShape(RoundedRectangle(cornerRadius: 32, style: .continuous))
         .shadow(color: .black.opacity(0.35), radius: 60, x: 0, y: 30)
+        // Luminous glass edge
         .overlay(
             RoundedRectangle(cornerRadius: 32, style: .continuous)
-                .stroke(.white.opacity(0.08), lineWidth: 0.8)
+                .stroke(
+                    LinearGradient(
+                        colors: [.white.opacity(0.22), .white.opacity(0.06)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    ),
+                    lineWidth: 0.8
+                )
+        )
+        // Subtle top-edge inner highlight for depth
+        .overlay(
+            RoundedRectangle(cornerRadius: 32, style: .continuous)
+                .fill(
+                    LinearGradient(
+                        colors: [.white.opacity(0.08), .clear],
+                        startPoint: .top,
+                        endPoint: .init(x: 0.5, y: 0.35)
+                    )
+                )
+                .allowsHitTesting(false)
         )
         .overlay(alignment: .topTrailing) {
             Button(action: { appState.dismissPanel() }) {

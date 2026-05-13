@@ -113,16 +113,29 @@ struct SettingsView: View {
             }
             
             Section {
-                Picker("STT Provider", selection: $settings.sttProviderId) {
-                    Text("None").tag(Optional<UUID>.none)
-                    ForEach(settings.providers) { provider in
-                        Text(provider.name).tag(Optional(provider.id))
+                Picker("STT Mode", selection: $settings.sttMode) {
+                    ForEach(STTMode.allCases) { mode in
+                        Text(mode.displayName).tag(mode)
                     }
                 }
                 .pickerStyle(.menu)
-                
-                TextField("STT Model ID", text: $settings.sttModel)
-                    .textFieldStyle(.roundedBorder)
+
+                if settings.sttMode == .api {
+                    Picker("STT Provider", selection: $settings.sttProviderId) {
+                        Text("None").tag(Optional<UUID>.none)
+                        ForEach(settings.providers) { provider in
+                            Text(provider.name).tag(Optional(provider.id))
+                        }
+                    }
+                    .pickerStyle(.menu)
+
+                    TextField("STT Model ID", text: $settings.sttModel)
+                        .textFieldStyle(.roundedBorder)
+                } else {
+                    Text("Uses on-device macOS speech recognition.")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
             } header: {
                 Text("Speech-to-Text")
             }

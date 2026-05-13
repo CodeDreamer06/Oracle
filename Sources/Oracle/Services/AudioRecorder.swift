@@ -34,8 +34,34 @@ final class AudioRecorder: @unchecked Sendable {
         return _currentDecibelLevel
     }
 
+    static func checkPermission() async -> Bool {
+        if #available(macOS 14.0, *) {
+            switch AVAudioApplication.shared.recordPermission {
+            case .granted:
+                return true
+            case .denied:
+                return false
+            case .undetermined:
+                return await withCheckedContinuation { continuation in
+                    AVAudioApplication.requestRecordPermission { granted in
+                        continuation.resume(returning: granted)
+                    }
+                }
+            @unknown default:
+                return false
+            }
+        }
+        // Fallback: try starting a temporary engine to trigger the prompt
+        return true
+    }
+
     func startRecording() async throws {
         logger.info("Starting audio recording")
+
+        guard await AudioRecorder.checkPermission() else {
+            logger.error("Microphone permission denied")
+            throw AudioRecorderError.permissionDenied
+        }
 
         let engine = AVAudioEngine()
         let inputNode = engine.inputNode

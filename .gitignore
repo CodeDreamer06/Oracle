@@ -17,3 +17,6 @@ Package.resolved
 # Temporary files
 *.swp
 *.tmp
+
+# Supertonic bundled resources (downloaded by setup.sh)
+Resources/supertonic/

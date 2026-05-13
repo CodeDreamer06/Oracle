@@ -3,7 +3,7 @@ import Foundation
 enum AssistantState: Equatable {
     case idle
     case listening(volume: Double)
-    case transcribing
+    case transcribing(preview: String)
     case thinking
     case speaking
     case toolExecuting(name: String)
