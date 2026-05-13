@@ -346,6 +346,12 @@ final class AppState {
             try await audioPlayer.play(data: audioData)
             assistantState = .idle
             resetInactivityTimer()
+            
+            // Auto-start listening for multi-turn conversations
+            if isPanelVisible && !messages.isEmpty {
+                try? await Task.sleep(nanoseconds: 300_000_000)
+                await startListening()
+            }
         } catch {
             logger.error("Speech synthesis failed: \(error.localizedDescription)")
             showError(title: "Speech Synthesis Error", message: error.localizedDescription)
