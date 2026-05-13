@@ -1,27 +1,31 @@
 import SwiftUI
 import AppKit
 import KeyboardShortcuts
+import AVFoundation
+import os.log
+
+private let logger = Logger(subsystem: "com.abhinav.oracle", category: "AppDelegate")
 
 @main
 struct OracleApp: App {
     @NSApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    
+
     var body: some Scene {
         MenuBarExtra("Oracle", systemImage: "waveform.circle.fill") {
             Button("Activate Oracle") {
                 appDelegate.togglePanel()
             }
             .keyboardShortcut(.return, modifiers: [])
-            
+
             Divider()
-            
+
             Button("Settings...") {
                 appDelegate.showSettings()
             }
             .keyboardShortcut(.init(","), modifiers: .command)
-            
+
             Divider()
-            
+
             Button("Quit Oracle") {
                 NSApplication.shared.terminate(nil)
             }
@@ -36,14 +40,37 @@ class AppDelegate: NSObject, NSApplicationDelegate {
     var windowController: AssistantWindowController?
     var settingsWindowController: NSWindowController?
     var hotkeyManager: HotkeyManager?
-    
+
     func applicationDidFinishLaunching(_ notification: Notification) {
         let state = AppState()
         appState = state
         hotkeyManager = HotkeyManager()
-        
+
         setupHotkey()
         setupWindow()
+        requestPermissions()
+    }
+
+    private func requestPermissions() {
+        // Pre-warm microphone permission so the prompt happens once at launch,
+        // not mid-conversation. If the app is not code-signed, macOS will still
+        // ask every run — sign the app with a consistent identity to fix that.
+        Task {
+            let granted = await AudioRecorder.checkPermission()
+            if granted {
+                logger.info("Microphone permission granted")
+            } else {
+                logger.warning("Microphone permission denied")
+            }
+        }
+
+        // Check Accessibility (required for global hotkeys via KeyboardShortcuts).
+        // There is no API to request this — user must enable it in System Settings.
+        let options: [String: Bool] = ["AXTrustedCheckOptionPrompt": false]
+        let accessibilityEnabled = AXIsProcessTrustedWithOptions(options as CFDictionary)
+        if accessibilityEnabled == false {
+            logger.warning("Accessibility permission not granted — global hotkey will not work")
+        }
     }
     
     func setupHotkey() {
@@ -135,8 +162,9 @@ class AssistantWindowController: NSWindowController, NSTouchBarDelegate {
         if let screen = NSScreen.main {
             let screenRect = screen.visibleFrame
             let windowSize = window.frame.size
-            let x = screenRect.midX - windowSize.width / 2
-            let y = screenRect.midY - windowSize.height / 2 + 80
+            let padding: CGFloat = 20
+            let x = screenRect.maxX - windowSize.width - padding
+            let y = screenRect.maxY - windowSize.height - padding
             window.setFrameOrigin(NSPoint(x: x, y: y))
         }
         

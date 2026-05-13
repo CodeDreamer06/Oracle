@@ -133,7 +133,6 @@ struct OrbView: View {
                         )
                         .frame(width: 120 + CGFloat(volumeScale * 60), height: 120 + CGFloat(volumeScale * 60))
                 }
-            }
         }
         .drawingGroup()
         .onAppear {
