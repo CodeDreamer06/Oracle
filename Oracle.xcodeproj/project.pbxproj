@@ -13,6 +13,7 @@
 		252D103E25718BD7D0F69D75 /* Conversation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0A724B756871A0DE53259A7C /* Conversation.swift */; };
 		29A2E8EB75899A69FB63AA86 /* HotkeyManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E2AF3EC43670425A01AF88A /* HotkeyManager.swift */; };
 		2AE694ECE14A72045E71E86F /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F4D787500DD346B3E94724 /* SettingsView.swift */; };
+		2BA3AA17C4FB92BF5EC4D845 /* ToolCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4ACBF4DA702F4654DEEDCD0E /* ToolCallView.swift */; };
 		3269D31002C3F1C1A4EE7870 /* AssistantPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 88496A88E80D7748F2A634DE /* AssistantPanel.swift */; };
 		3A313C706D8925A62851DB28 /* ToolExecutor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82296B79702040176054F9E5 /* ToolExecutor.swift */; };
 		43083DCB163A4919AD188BDE /* SpeechRecognitionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 754A1A5A5C4A85A90C3432F5 /* SpeechRecognitionService.swift */; };
@@ -44,6 +45,7 @@
 		2E2AF3EC43670425A01AF88A /* HotkeyManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HotkeyManager.swift; sourceTree = "<group>"; };
 		35249DFDDE66E5CCE6FA617A /* ConversationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConversationView.swift; sourceTree = "<group>"; };
 		3B8D4BA5A42E953BA62ABB9B /* VisualEffects.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisualEffects.swift; sourceTree = "<group>"; };
+		4ACBF4DA702F4654DEEDCD0E /* ToolCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolCallView.swift; sourceTree = "<group>"; };
 		4E355AE174F347BFF71D04EC /* KeychainHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainHelper.swift; sourceTree = "<group>"; };
 		50C4816C78CEB75AF188A729 /* AssistantState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssistantState.swift; sourceTree = "<group>"; };
 		5CB241147D1C15D46E6027F8 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
@@ -116,6 +118,7 @@
 				35249DFDDE66E5CCE6FA617A /* ConversationView.swift */,
 				C00A07FCC8C1157A4E728F94 /* OrbView.swift */,
 				D9F4D787500DD346B3E94724 /* SettingsView.swift */,
+				4ACBF4DA702F4654DEEDCD0E /* ToolCallView.swift */,
 				609BD3073E3A555EA2227198 /* ToolConfirmationView.swift */,
 				3B8D4BA5A42E953BA62ABB9B /* VisualEffects.swift */,
 			);
@@ -268,6 +271,7 @@
 				2AE694ECE14A72045E71E86F /* SettingsView.swift in Sources */,
 				43083DCB163A4919AD188BDE /* SpeechRecognitionService.swift in Sources */,
 				FF1C53045BD9268689E00496 /* SupertonicTTS.swift in Sources */,
+				2BA3AA17C4FB92BF5EC4D845 /* ToolCallView.swift in Sources */,
 				495336A9EEB9D17690DEA9DE /* ToolConfirmationView.swift in Sources */,
 				68E6DE4113669088D5B55085 /* ToolDefinition.swift in Sources */,
 				3A313C706D8925A62851DB28 /* ToolExecutor.swift in Sources */,
