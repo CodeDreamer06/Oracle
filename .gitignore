@@ -1,0 +1,19 @@
+# macOS
+.DS_Store
+
+# Xcode
+build/
+DerivedData/
+*.xcworkspace/xcuserdata/
+*.xcuserstate
+project.xcworkspace/xcuserdata/
+Oracle.xcodeproj/xcuserdata/
+Oracle.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Swift Package Manager
+.build/
+Package.resolved
+
+# Temporary files
+*.swp
+*.tmp

@@ -1,0 +1,29 @@
+name: Oracle
+options:
+  bundleIdPrefix: com.abhinav
+  deploymentTarget:
+    macOS: "15.0"
+  xcodeVersion: "16.0"
+targets:
+  Oracle:
+    type: application
+    platform: macOS
+    sources:
+      - path: Sources/Oracle
+    resources:
+      - path: Resources
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.abhinav.oracle
+        INFOPLIST_FILE: Resources/Info.plist
+        CODE_SIGN_ENTITLEMENTS: Resources/Oracle.entitlements
+        ENABLE_HARDENED_RUNTIME: YES
+        SWIFT_VERSION: "6.0"
+        GENERATE_INFOPLIST_FILE: NO
+    dependencies:
+      - package: KeyboardShortcuts
+        product: KeyboardShortcuts
+packages:
+  KeyboardShortcuts:
+    url: https://github.com/sindresorhus/KeyboardShortcuts
+    from: "2.0.0"
