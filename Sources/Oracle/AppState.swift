@@ -95,7 +95,7 @@ final class AppState {
                 }
             }
             
-            // Auto-stop after 2 seconds of silence
+            // Auto-stop after 4 seconds of silence
             silenceTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
                 Task { @MainActor in
                     guard case .listening = self?.assistantState else { return }
@@ -138,18 +138,24 @@ final class AppState {
         }
         
         do {
-            let text = try await SpeechRecognitionService.transcribe(
-                audioURL: audioURL,
-                provider: settings.sttProvider,
-                model: settings.sttModel
-            )
-            
+            let text: String
+            switch settings.sttMode {
+            case .macOSDefault:
+                text = try await SpeechRecognitionService.transcribeWithMacOS(audioURL: audioURL)
+            case .api:
+                text = try await SpeechRecognitionService.transcribe(
+                    audioURL: audioURL,
+                    provider: settings.sttProvider,
+                    model: settings.sttModel
+                )
+            }
+
             guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
                 logger.info("Transcription was empty")
                 assistantState = .idle
                 return
             }
-            
+
             logger.info("Transcription received: \(text)")
             await processUserMessage(text)
         } catch {
